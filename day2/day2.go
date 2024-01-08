@@ -7,11 +7,10 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"unicode"
+	"golang.org/x/exp/slices"
 )
 
 func main() {
-	//12red 13 green 14 blue
 	file, err := os.Open("./input")
 	if err != nil {
 		log.Fatal(err)
@@ -20,8 +19,7 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-
-	var redCubes, greenCubes, blueCubes int
+	var validIds []int
 	sumIds := 0
 
 	for scanner.Scan() {
@@ -33,34 +31,42 @@ func main() {
 			fmt.Println("Error converting id to integer:", err)
 		}
 		rounds := games[1]
+		turn := strings.Split(rounds, ",")
 
-		for i, v := range rounds {
-			if unicode.IsDigit(v) && i+2 < len(rounds) {
-				digit := int(v - '0')
+		validGames := []bool{true}
+		for _, v := range turn {
+			play := strings.Split(v, " ")
+			fmt.Printf("play: %v\n", play)
+			for i := 0; i < len(play); i++ {
+				num, err := strconv.ParseInt(play[i], 10, 64)
+				if err != nil {
+					fmt.Printf("Non-numeric value: %v\n", play[i])
+					continue
+				}
+				if (play[i+1] == "red" || play[i+1] == "red;") && num > 12 {
+					validGames = append(validGames, false)
+				}
 
-				if rounds[i+2] == 'r' {
-					redCubes += digit
+				if (play[i+1] == "green" || play[i+1] == "green;") && num > 13 {
+					validGames = append(validGames, false)
 				}
-				if rounds[i+2] == 'g' {
-					greenCubes += digit
-				}
-				if rounds[i+2] == 'b' {
-					blueCubes += digit
+				if (play[i+1] == "blue" || play[i+1] == "blue;") && num > 14 {
+					validGames = append(validGames, false)
 				}
 
 			}
-		}
 
-		if redCubes <= 12 && greenCubes <= 13 && blueCubes <= 14 {
-			sumIds += id
-            fmt.Println(redCubes, greenCubes, blueCubes)
 		}
-
-		redCubes = 0
-		greenCubes = 0
-		blueCubes = 0
+		if !slices.Contains(validGames, false) {
+			validIds = append(validIds, id)
+		}
+		validGames = nil
 
 	}
-
+    
+    for i := 0; i < len(validIds); i ++ {
+        sumIds += validIds[i]
+    }
+    
 	fmt.Print(sumIds)
 }
