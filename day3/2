@@ -1,0 +1,121 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"regexp"
+	"strings"
+)
+
+func main() {
+
+	file, err := os.Open("./input")
+	re := regexp.MustCompile(`^[^\w.]+$`)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	var input = [][]string{}
+
+	var num string
+
+	var nums = []string{}
+
+	for scanner.Scan() {
+		input = append(input, strings.Split(scanner.Text(), ""))
+	}
+
+	for rowIndex, row := range input {
+		for colIndex, col := range row {
+			if col > "0" && col <= "9" {
+				num += col
+				if row[colIndex+1] == "." {
+					checkIndex := colIndex - len(num)
+					//check if symbol on the same row but before it
+					if checkIndex >= 0 && checkIndex < len(row) {
+						if re.MatchString(row[checkIndex]) {
+							nums = append(nums, num)
+							num = ""
+							continue
+						}
+					}
+
+					//check if symbol  above it
+					for i := 1; i <= len(num); i++ {
+						pointerIndex := colIndex - len(num) + i
+						if pointerIndex >= 0 && checkIndex < len(row) && rowIndex > 0 {
+							if re.MatchString(input[rowIndex-1][pointerIndex]) {
+								nums = append(nums, num)
+								num = ""
+								continue
+							}
+						}
+					}
+
+					//check if symbol  below  it
+					for i := 1; i <= len(num); i++ {
+						pointerIndex := colIndex - len(num) + i
+						if pointerIndex >= 0 && checkIndex < len(row) && rowIndex < len(input)-1 {
+							if re.MatchString(input[rowIndex+1][pointerIndex]) {
+								nums = append(nums, num)
+								num = ""
+								continue
+							}
+						}
+					}
+
+					//check if symbol  top left of  it
+					topLeftPointer := colIndex - len(num) + 1
+					if topLeftPointer >= 0 && rowIndex > 0 {
+						if re.MatchString(input[rowIndex-1][topLeftPointer]) {
+							nums = append(nums, num)
+							num = ""
+							continue
+						}
+					}
+
+					//check if symbol  top right of  it
+					topRightPointer := colIndex + 1
+					if topRightPointer < len(row) && rowIndex > 0 {
+						if re.MatchString(input[rowIndex-1][topRightPointer]) {
+							nums = append(nums, num)
+							num = ""
+							continue
+						}
+					}
+
+					//check if symbol bottom left of  it
+					bottomLeft := colIndex - len(num) 
+					if bottomLeft >= 0 && rowIndex < len(input)-1 {
+						if re.MatchString(input[rowIndex+1][bottomLeft]) {
+							nums = append(nums, num)
+							num = ""
+							continue
+						}
+					}
+
+				}
+
+				if re.MatchString(row[colIndex+1]) {
+					nums = append(nums, num)
+					num = ""
+					continue
+				}
+
+			}
+			if col == "." {
+				num = ""
+			}
+		}
+
+	}
+
+	fmt.Printf("nums: %v\n", nums)
+
+}
