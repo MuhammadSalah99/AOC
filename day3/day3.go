@@ -32,6 +32,8 @@ func main() {
 		input = append(input, strings.Split(scanner.Text(), ""))
 	}
 
+	added := false
+
 	for rowIndex, row := range input {
 		for colIndex, col := range row {
 			if col >= "0" && col <= "9" {
@@ -50,15 +52,14 @@ func main() {
 							fmt.Println("val:", val, rowIndex, colIndex)
 							sum += val
 
-							num = ""
-							continue
+							added = true
 						}
 					}
 
 					//check if symbol  above it
 					for i := 1; i <= len(num); i++ {
 						pointerIndex := colIndex - len(num) + i
-						if pointerIndex >= 0 && checkIndex < len(row) && rowIndex > 0 {
+						if pointerIndex >= 0 && checkIndex < len(row) && rowIndex > 0 && num != "" {
 							if re.MatchString(input[rowIndex-1][pointerIndex]) {
 								val, err := strconv.Atoi(num)
 								if err != nil {
@@ -68,17 +69,17 @@ func main() {
 
 								fmt.Println("val:", val, rowIndex, colIndex)
 								sum += val
+								added = true
 
-								num = ""
-								continue
 							}
 						}
+
 					}
 
 					//check if symbol  below  it
 					for i := 1; i <= len(num); i++ {
 						pointerIndex := colIndex - len(num) + i
-						if pointerIndex >= 0 && checkIndex < len(row) && rowIndex < len(input)-1 {
+						if pointerIndex >= 0 && checkIndex < len(row) && rowIndex < len(input)-1 && num != "" {
 							if re.MatchString(input[rowIndex+1][pointerIndex]) {
 								val, err := strconv.Atoi(num)
 								if err != nil {
@@ -89,15 +90,15 @@ func main() {
 								fmt.Println("val:", val, rowIndex, colIndex)
 								sum += val
 
-								num = ""
-								continue
+								added = true
 							}
 						}
+
 					}
 
 					//check if symbol  top left of  it
-					topLeftPointer := colIndex - len(num) + 1
-					if topLeftPointer >= 0 && rowIndex > 0 {
+					topLeftPointer := colIndex - len(num)
+					if topLeftPointer >= 0 && rowIndex > 0 && num != "" {
 						if re.MatchString(input[rowIndex-1][topLeftPointer]) {
 							val, err := strconv.Atoi(num)
 							if err != nil {
@@ -108,14 +109,14 @@ func main() {
 							fmt.Println("val:", val, rowIndex, colIndex)
 							sum += val
 
-							num = ""
-							continue
+							added = true
 						}
+
 					}
 
 					//check if symbol  top right of  it
 					topRightPointer := colIndex + 1
-					if topRightPointer < len(row) && rowIndex > 0 {
+					if topRightPointer < len(row) && rowIndex > 0 && num != "" {
 						if re.MatchString(input[rowIndex-1][topRightPointer]) {
 							val, err := strconv.Atoi(num)
 							if err != nil {
@@ -126,14 +127,14 @@ func main() {
 							fmt.Println("val:", val, rowIndex, colIndex)
 							sum += val
 
-							num = ""
-							continue
+							added = true
 						}
+
 					}
 
 					//check if symbol bottom left of  it
 					bottomLeft := colIndex - len(num)
-					if bottomLeft >= 0 && rowIndex < len(input)-1 {
+					if bottomLeft >= 0 && rowIndex < len(input)-1 && num != "" {
 						if re.MatchString(input[rowIndex+1][bottomLeft]) {
 							val, err := strconv.Atoi(num)
 							if err != nil {
@@ -144,14 +145,14 @@ func main() {
 							fmt.Println("val:", val, rowIndex, colIndex)
 							sum += val
 
-							num = ""
-							continue
+							added = true
 						}
+
 					}
 
 					//check if symbol bottom right of  it
 					bottomRight := colIndex + 1
-					if bottomRight < len(row) && rowIndex < len(input)-1 {
+					if bottomRight < len(row) && rowIndex < len(input)-1 && num != "" {
 						if re.MatchString(input[rowIndex+1][bottomRight]) {
 							val, err := strconv.Atoi(num)
 							if err != nil {
@@ -162,14 +163,13 @@ func main() {
 							fmt.Println("val:", val, rowIndex, colIndex)
 							sum += val
 
-							num = ""
-							continue
+							added = true
 						}
 					}
 
 				}
 
-				if colIndex+1 < len(row) && re.MatchString(row[colIndex+1]) {
+				if colIndex+1 < len(row) && re.MatchString(row[colIndex+1]) && num != "" {
 					val, err := strconv.Atoi(num)
 					if err != nil {
 						fmt.Println("Error converting string to int:", err)
@@ -178,11 +178,14 @@ func main() {
 
 					fmt.Println("val:", val, rowIndex, colIndex)
 					sum += val
+					added = true
 
-					num = ""
-					continue
 				}
 
+				if added {
+					num = ""
+                    added = false
+				}
 			}
 			if col == "." {
 				num = ""
